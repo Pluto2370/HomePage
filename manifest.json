@@ -1,0 +1,15 @@
+{
+  "manifest_version": 3,
+  "name": "我的主页",
+  "version": "1.0",
+  "description": "自定义 Chrome 新标签页",
+  "chrome_url_overrides": {
+    "newtab": "index.html"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src https://v1.hitokoto.cn"
+  },
+  "host_permissions": [
+    "https://v1.hitokoto.cn/*"
+  ]
+}

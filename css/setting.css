@@ -1,0 +1,138 @@
+/*设置按钮*/
+.settings-btn {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    width: 44px;
+    height: 44px;
+    border: none;
+    background: transparent;
+    backdrop-filter: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 50s ease;
+    z-index: 10;
+}
+.settings-btn:hover {
+    transform: rotate(7200deg);
+}
+.settings-btn svg {
+    transition: stroke 0.3s ease;
+}
+.settings-btn:hover svg {
+    stroke: rgba(178, 50, 255, 0.52);
+}
+/*设置页面*/
+.settings-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    width: 620px;
+    max-height: 80vh;
+    padding: 30px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(4px);
+    border-radius: 20px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, transform 0.3s ease, visibility 0.3s ease;
+    z-index: 20;
+    overflow-y: auto;
+}
+.settings-panel.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translate(-50%, -50%) scale(1);
+}
+.settings-panel h4 {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 18px;
+    color: #333;
+    margin-bottom: 40px;
+    text-align: center;
+}
+.settings-panel p {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 14px;
+    color: #666;
+    text-align: center;
+}
+/*设置分区*/
+.settings-section {
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+.settings-section:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+}
+.settings-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.settings-label {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    color: #444;
+    flex-shrink: 0;
+}
+
+.gradient-colors-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    align-items: center;
+    flex-shrink: 0;
+}
+.color-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.color-row span {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 13px;
+    color: #666;
+}
+.color-input {
+    width: 32px;
+    height: 32px;
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    border-radius: 8px;
+    cursor: pointer;
+    background: none;
+    padding: 0;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+.color-input::-webkit-color-swatch-wrapper {
+    padding: 2px;
+}
+.color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 5px;
+}
+.reset-bg-btn {
+    margin-left: 3px;
+    padding: 6px 12px;
+    font-size: 13px;
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    border: 1px solid rgba(150, 150, 150, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.5);
+    color: #555;
+    cursor: pointer;
+    transition: background 0.2s ease, border-color 0.2s ease;
+    flex-shrink: 0;
+}
+.reset-bg-btn:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: rgba(100, 100, 100, 0.4);
+}

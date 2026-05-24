@@ -1,0 +1,314 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #f6ede7, rgba(233, 252, 228, 0.9), rgba(223, 253, 251, 0.89)
+    , rgba(229, 233, 250, 0.9), rgba(250, 202, 220, 0.89));
+}
+/*时间*/
+.clock-section {
+    position: absolute;
+    top: calc(18.33vh);
+    left: 50%;
+    width: max-content;
+    max-width: calc(100% - 32px);
+    text-align: center;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+.clock {
+    font-family: "Ma Shan Zheng", "STKaiti", "KaiTi", cursive;
+    font-size: clamp(1.7rem, 7vw, 5rem);
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    background: linear-gradient(135deg, #ff4747, #ff942e, #c8de43
+    , #449645, #3ec5ba, #4695ff, #d150e8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.17));
+    white-space: nowrap;
+}
+/*遮罩层*/
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(176, 170, 170, 0.1);
+    backdrop-filter: blur(18px);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    z-index: 1;
+}
+.overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+
+/*搜索框*/
+.search-container {
+    display: flex;
+    justify-content: center;
+    padding-top: 33vh;
+    position: relative;
+    z-index: 2;
+}
+.search-box {
+    position: relative;
+}
+.search-input {
+    width: 300px;
+    height: 42px;
+    padding: 10px 50px 10px 20px;
+    font-size: 16px;
+    border: 0 solid rgba(255, 255, 255, 0.5);
+    border-radius: 50px;
+    outline: none;
+    background: rgba(255, 255, 255, 0.25);
+    color: #1f1f1f;
+    backdrop-filter: blur(2px);
+    box-shadow: 0 8px 20px rgba(26, 26, 26, 0.25);
+    transition: width 0.4s ease, height 0.4s ease, box-shadow 0.3s ease, background 0.3s ease;
+    font-family: "Ma Shan Zheng", "STKaiti", "KaiTi", cursive !important;
+}
+.search-input:hover {
+    width: 450px;
+    height: 48px;
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.12);
+}
+.search-input.active {
+    width: 450px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(200, 215, 230, 0.6);
+    box-shadow: 0 1px 3px rgba(150, 180, 210, 0.12),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+    border-radius: 100px;
+}
+.search-input::placeholder {
+    color: rgba(54, 53, 53, 0.5);
+}
+.search-btn {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    border: none;
+    background: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4px;
+}
+.search-btn:hover svg {
+    stroke: #555;
+}
+
+/*书签*/
+.bookmarks-container {
+    display: flex;
+    justify-content: center;
+    gap: 48px;
+    margin-top: 13vh;
+    position: relative;
+    z-index: 0;
+}
+.bookmark-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+}
+.bookmark-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 20px;
+    backdrop-filter: blur(4px);
+    box-shadow: 0 6px 8px rgba(148, 147, 147, 0.79);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.7), rgba(255, 240, 245, 0.5), rgba(240, 248, 255, 0.6));
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.bookmark-icon span {
+    font-family: "Ma Shan Zheng", "STKaiti", "KaiTi", cursive !important;
+    font-size: 28px !important;
+    font-weight: bolder !important;
+    background-image: linear-gradient(
+            135deg,
+            rgba(232, 230, 219, 0.21) 0%,
+            #fda085 20%,
+            #aabcd9 45%,
+            #e569da 70%,
+            #84fab0 100%
+    ) !important;
+    -webkit-background-clip: text !important;
+    background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+}
+.bookmark-icon.add {
+    background: rgba(255, 255, 255, 0.5);
+}
+.bookmark-icon.add span {
+    background-image: none;
+    -webkit-text-fill-color: #999;
+    font-weight: 400;
+}
+.bookmark-item:hover .bookmark-icon {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+}
+.bookmark-label {
+    font-size: 14px;
+    color: #b0abab;
+    letter-spacing: 0.02em;
+}
+
+/*添加书签表单*/
+.add-bookmark-form {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.6);
+    backdrop-filter: blur(12px);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px) scale(0.95);
+    transition: opacity 0.25s ease, transform 0.25s ease, visibility 0.25s ease;
+    z-index: 2;
+}
+.add-bookmark-form.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0) scale(1);
+}
+.form-input {
+    width: 200px;
+    padding: 10px 14px;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    outline: none;
+    background: rgba(232, 229, 229, 0.5);
+    color: #666;
+    backdrop-filter: blur(15px);
+}
+.form-input::placeholder {
+    color: rgba(100, 100, 100, 0.5);
+}
+.form-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+}
+.form-btn {
+    padding: 8px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+.form-btn.confirm {
+    background: rgba(206, 99, 99, 0.53);
+    color: #464545;
+}
+.form-btn.confirm:hover {
+    background: rgba(100, 100, 100, 0.25);
+}
+.form-btn.cancel {
+    background: rgba(180, 180, 180, 0.15);
+    color: #444242;
+}
+.form-btn.cancel:hover {
+    background: rgba(180, 180, 180, 0.25);
+}
+/*右键菜单*/
+.edit-bookmark-form {
+    position: absolute;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: scale(0.95);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s ease;
+    z-index: 3;
+}
+.edit-bookmark-form.show {
+    opacity: 1;
+    visibility: visible;
+    transform: scale(1);
+}
+.edit-btn {
+    background: rgba(185, 182, 182, 0.23);
+    color: #4466aa;
+}
+.edit-btn:hover {
+    background: rgba(100, 160, 255, 0.35);
+}
+.delete-btn {
+    background: rgba(255, 100, 100, 0.2);
+    color: #cc5555;
+}
+.delete-btn:hover {
+    background: rgba(255, 100, 100, 0.35);
+}
+
+/*底部谏言*/
+.footer-quote {
+    position: fixed;
+    bottom: 10vh;
+    left: 50%;
+    transform: translateX(-50%);
+    backdrop-filter: blur(10px);
+    border-radius: 30px;
+    max-width: 80vw;
+    text-align: center;
+    z-index: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.footer-quote div {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    font-style: italic;
+    color: #999;
+    flex-shrink: 0;
+
+}
+.footer-quote p {
+    font-family: "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;
+    font-size: 16px;
+    font-style: italic;
+    color: #555;
+    letter-spacing: 0.04em;
+    line-height: 1.6;
+    margin: 0;
+}
+
+
+
