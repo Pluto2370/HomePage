@@ -1,212 +1,586 @@
 function updateClock() {
     var now = new Date();
+
     var h = String(now.getHours()).padStart(2, '0');
     var m = String(now.getMinutes()).padStart(2, '0');
     var s = String(now.getSeconds()).padStart(2, '0');
+
     var clockEl = document.getElementById('clock');
+
     clockEl.textContent = h + ':' + m + ':' + s;
+
     clockEl.setAttribute('datetime', now.toISOString());
 }
+
 updateClock();
+
 setInterval(updateClock, 1000);
 
 function doSearch() {
+
     var query = document.querySelector('.search-input').value.trim();
+
     if (query) {
-        window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(query));
+
+        window.open(
+            'https://www.baidu.com/s?wd=' + encodeURIComponent(query),
+            '_blank'
+        );
     }
 }
 
 var searchInput = document.querySelector('.search-input');
+
 var overlay = document.querySelector('.overlay');
 
 searchInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') doSearch();
+
+    if (e.key === 'Enter') {
+        doSearch();
+    }
 });
 
 searchInput.addEventListener('click', function(e) {
+
     e.stopPropagation();
+
     searchInput.classList.add('active');
+
     overlay.classList.add('active');
 });
 
 document.getElementById('searchBtn').addEventListener('click', function(e) {
+
     e.stopPropagation();
+
     doSearch();
 });
 
 document.getElementById('settingsBtn').addEventListener('click', function(e) {
+
     e.stopPropagation();
+
     toggleSettings();
 });
 
 document.getElementById('settingsPanel').addEventListener('click', function(e) {
+
     e.stopPropagation();
 });
 
 document.getElementById('confirmAddBtn').addEventListener('click', confirmAdd);
+
 document.getElementById('cancelAddBtn').addEventListener('click', closeAddForm);
+
 document.getElementById('editBookmarkBtn').addEventListener('click', editCurrentBookmark);
+
 document.getElementById('deleteBookmarkBtn').addEventListener('click', deleteCurrentBookmark);
 
 document.getElementById('editForm').addEventListener('click', function(e) {
+
     e.stopPropagation();
 });
 
+document.getElementById('exportBookmarksBtn').addEventListener('click', function(e) {
+
+    e.stopPropagation();
+
+    exportBookmarks();
+});
+
+document.getElementById('importBookmarksBtn').addEventListener('click', function(e) {
+
+    e.stopPropagation();
+
+    document.getElementById('importBookmarksFile').click();
+});
+
+document.getElementById('importBookmarksFile').addEventListener('change', function(e) {
+
+    e.stopPropagation();
+
+    importBookmarks(e);
+});
+
 document.getElementById('resetBgBtn').addEventListener('click', resetBackground);
+
 document.getElementById('resetClockBtn').addEventListener('click', resetClockColor);
 
 document.addEventListener('click', function() {
+
     searchInput.classList.remove('active');
+
     overlay.classList.remove('active');
+
     document.getElementById('editForm').classList.remove('show');
+
     document.getElementById('settingsPanel').classList.remove('show');
 });
 
-/*书签*/
+/* =========================
+   工具函数
+========================= */
+
+window.editMode = false;
+
+function escapeHtml(str) {
+
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
+function normalizeUrl(url) {
+
+    url = url.trim();
+
+    if (!/^https?:\/\//i.test(url)) {
+
+        url = 'https://' + url;
+    }
+
+    return url;
+}
+
+/* =========================
+   书签
+========================= */
+
 var defaultBookmarks = [
-    { name: 'B站', url: 'https://www.bilibili.com', icon: 'B' },
-    { name: '力扣', url: 'https://leetcode.cn', icon: '力' }
+    {
+        name: 'B站',
+        url: 'https://www.bilibili.com',
+        icon: 'B'
+    },
+    {
+        name: '力扣',
+        url: 'https://leetcode.cn',
+        icon: '力'
+    }
 ];
-var bookmarksData = JSON.parse(localStorage.getItem('bookmarksData')) || defaultBookmarks;
+
+var bookmarksData =
+    JSON.parse(localStorage.getItem('bookmarksData')) || defaultBookmarks;
+
 var currentEditIndex = -1;
 
+var dragSrcIndex = -1;
+
 function saveBookmarks() {
-    localStorage.setItem('bookmarksData', JSON.stringify(bookmarksData));
+
+    localStorage.setItem(
+        'bookmarksData',
+        JSON.stringify(bookmarksData)
+    );
+}
+
+function clearDragStyles() {
+
+    document.querySelectorAll('.bookmark-item').forEach(function(el) {
+
+        el.classList.remove('drag-over', 'dragging');
+    });
 }
 
 function renderBookmarks() {
+
     var container = document.getElementById('bookmarks');
+
     var html = '';
+
     bookmarksData.forEach(function(item, index) {
-        html += '<div class="bookmark-item" data-index="' + index + '">' +
-            '<div class="bookmark-icon"><span>' + item.icon + '</span></div>' +
-            '<span class="bookmark-label">' + item.name + '</span></div>';
+
+        var safeName = escapeHtml(item.name || '');
+
+        var safeIcon = escapeHtml(item.icon || '?');
+
+        html +=
+            '<div class="bookmark-item" data-index="' + index + '" draggable="true">' +
+            '<div class="bookmark-icon">' +
+            '<span>' + safeIcon + '</span>' +
+            '</div>' +
+            '<span class="bookmark-label">' + safeName + '</span>' +
+            '</div>';
     });
-    html += '<div class="bookmark-item add-item">' +
+
+    html +=
+        '<div class="bookmark-item add-item">' +
         '<div class="bookmark-icon add"><span>+</span></div>' +
-        '<span class="bookmark-label">添加</span></div>';
+        '<span class="bookmark-label">添加</span>' +
+        '</div>';
+
     container.innerHTML = html;
 
-    container.querySelectorAll('.bookmark-item:not(.add-item)').forEach(function(el) {
-        var idx = parseInt(el.getAttribute('data-index'));
-        el.addEventListener('click', function(e) {
-            e.stopPropagation();
-            window.open(bookmarksData[idx].url);
+    container
+        .querySelectorAll('.bookmark-item:not(.add-item)')
+        .forEach(function(el) {
+
+            var idx = parseInt(el.getAttribute('data-index'));
+
+            el.addEventListener('click', function(e) {
+
+                e.stopPropagation();
+
+                var url = bookmarksData[idx].url;
+
+                if (url) {
+
+                    window.open(url, '_blank');
+                }
+            });
+
+            el.addEventListener('contextmenu', function(e) {
+
+                e.stopPropagation();
+
+                e.preventDefault();
+
+                showEditForm(e, idx);
+            });
+
+            el.addEventListener('dragstart', function(e) {
+
+                e.dataTransfer.setData('text/plain', idx);
+
+                el.classList.add('dragging');
+
+                dragSrcIndex = idx;
+            });
+
+            el.addEventListener('dragend', function() {
+
+                el.classList.remove('dragging');
+
+                clearDragStyles();
+            });
+
+            el.addEventListener('dragover', function(e) {
+
+                e.preventDefault();
+
+                el.classList.add('drag-over');
+            });
+
+            el.addEventListener('dragleave', function() {
+
+                el.classList.remove('drag-over');
+            });
+
+            el.addEventListener('drop', function(e) {
+
+                e.preventDefault();
+
+                e.stopPropagation();
+
+                var fromIndex =
+                    parseInt(e.dataTransfer.getData('text/plain'));
+
+                var toIndex = idx;
+
+                if (fromIndex !== toIndex) {
+
+                    var temp = bookmarksData[fromIndex];
+
+                    bookmarksData[fromIndex] = bookmarksData[toIndex];
+
+                    bookmarksData[toIndex] = temp;
+
+                    saveBookmarks();
+
+                    renderBookmarks();
+                }
+
+                clearDragStyles();
+            });
         });
-        el.addEventListener('contextmenu', function(e) {
-            e.stopPropagation();
-            e.preventDefault();
-            showEditForm(e, idx);
-        });
-    });
 
     container.querySelector('.add-item').addEventListener('click', function(e) {
+
         e.stopPropagation();
+
         showAddForm(this);
     });
 }
 
+function exportBookmarks() {
+
+    var data = JSON.stringify(bookmarksData, null, 2);
+
+    var blob = new Blob(
+        [data],
+        {
+            type: 'application/json'
+        }
+    );
+
+    var a = document.createElement('a');
+
+    a.href = URL.createObjectURL(blob);
+
+    a.download = 'bookmarks.json';
+
+    document.body.appendChild(a);
+
+    a.click();
+
+    document.body.removeChild(a);
+
+    URL.revokeObjectURL(a.href);
+}
+
+function importBookmarks(e) {
+
+    var file = e.target.files[0];
+
+    if (!file) return;
+
+    var reader = new FileReader();
+
+    reader.onload = function(event) {
+
+        try {
+
+            var data = JSON.parse(event.target.result);
+
+            if (!Array.isArray(data)) {
+
+                throw new Error('不是数组');
+            }
+
+            var validData = data
+                .filter(function(item) {
+
+                    return item &&
+                        typeof item.name === 'string' &&
+                        typeof item.url === 'string';
+                })
+                .map(function(item) {
+
+                    var cleanName = item.name.trim();
+
+                    return {
+                        name: cleanName,
+                        url: normalizeUrl(item.url),
+                        icon: item.icon
+                            ? String(item.icon).charAt(0)
+                            : cleanName.charAt(0)
+                    };
+                });
+
+            if (validData.length === 0) {
+
+                throw new Error('没有有效书签');
+            }
+
+            bookmarksData = validData;
+
+            saveBookmarks();
+
+            renderBookmarks();
+
+            alert('导入成功，共 ' + validData.length + ' 个书签');
+
+        } catch (err) {
+
+            console.error(err);
+
+            alert('文件格式错误，请选择正确的书签 JSON 文件');
+        }
+    };
+
+    reader.readAsText(file);
+
+    e.target.value = '';
+}
+
 function showAddForm(addItem) {
+
     var form = document.getElementById('addForm');
+
     var rect = addItem.getBoundingClientRect();
-    form.style.left = rect.left + rect.width / 2 - 120 + 'px';
-    form.style.top = rect.top - 120 + 'px';
+
+    form.style.left =
+        rect.left + rect.width / 2 - 120 + 'px';
+
+    form.style.top =
+        rect.top - 120 + 'px';
+
     form.classList.add('show');
+
     if (currentEditIndex === -1 || !window.editMode) {
+
         document.getElementById('bookmarkName').value = '';
+
         document.getElementById('bookmarkUrl').value = '';
     }
+
     document.getElementById('bookmarkName').focus();
 }
 
 function closeAddForm() {
+
     document.getElementById('addForm').classList.remove('show');
 }
 
 function showEditForm(event, index) {
+
     currentEditIndex = index;
+
     var form = document.getElementById('editForm');
+
     form.style.left = event.clientX + 'px';
+
     form.style.top = event.clientY + 'px';
+
     form.classList.add('show');
 }
 
 function closeEditForm() {
+
     document.getElementById('editForm').classList.remove('show');
 }
 
 function editCurrentBookmark() {
+
     if (currentEditIndex === -1) return;
+
     var item = bookmarksData[currentEditIndex];
+
     document.getElementById('bookmarkName').value = item.name;
+
     document.getElementById('bookmarkUrl').value = item.url;
+
     closeEditForm();
+
     window.editMode = true;
+
     window.currentEditIndex = currentEditIndex;
+
     showAddForm(document.querySelector('.add-item'));
 }
 
 function confirmAdd() {
-    var name = document.getElementById('bookmarkName').value.trim();
-    var url = document.getElementById('bookmarkUrl').value.trim();
+
+    var name =
+        document.getElementById('bookmarkName').value.trim();
+
+    var url =
+        document.getElementById('bookmarkUrl').value.trim();
+
     if (!name || !url) return;
+
+    url = normalizeUrl(url);
+
     if (window.editMode && currentEditIndex !== -1) {
+
         bookmarksData[currentEditIndex] = {
             name: name,
             url: url,
             icon: name.charAt(0)
         };
+
         window.editMode = false;
+
         currentEditIndex = -1;
+
     } else {
+
         bookmarksData.push({
             name: name,
             url: url,
             icon: name.charAt(0)
         });
     }
+
     saveBookmarks();
+
     renderBookmarks();
+
     closeAddForm();
 }
 
 function deleteCurrentBookmark() {
+
     if (currentEditIndex === -1) return;
+
     bookmarksData.splice(currentEditIndex, 1);
+
     saveBookmarks();
+
     renderBookmarks();
+
     closeEditForm();
 }
 
 renderBookmarks();
 
+/* =========================
+   一言
+========================= */
+
 function fetchQuote() {
-    fetch('https://v1.hitokoto.cn/?c=a&c=b&c=c&c=d&c=h&c=i&c=k')
-        .then(function(res) { return res.json(); })
+
+    fetch(
+        'https://v1.hitokoto.cn/?c=a&c=b&c=c&c=d&c=h&c=i&c=k'
+    )
+        .then(function(res) {
+
+            return res.json();
+        })
         .then(function(data) {
+
             var text = data.hitokoto;
-            if (data.from) text += ' —— ' + data.from;
+
+            if (data.from) {
+
+                text += ' —— ' + data.from;
+            }
+
             document.getElementById('quote').textContent = text;
         })
         .catch(function() {
+
             var fallback = [
-                "不积跬步，无以至千里。",
-                "千里之行，始于足下。",
-                "学而不思则罔，思而不学则殆。"
+                '不积跬步，无以至千里。',
+                '千里之行，始于足下。',
+                '学而不思则罔，思而不学则殆。'
             ];
-            document.getElementById('quote').textContent = fallback[Math.floor(Math.random() * fallback.length)];
+
+            document.getElementById('quote').textContent =
+                fallback[
+                    Math.floor(Math.random() * fallback.length)
+                    ];
         });
 }
+
 fetchQuote();
 
+/* =========================
+   设置面板
+========================= */
+
 function toggleSettings() {
+
     var panel = document.getElementById('settingsPanel');
+
     panel.classList.toggle('show');
 }
 
-/*背景渐变色设置*/
-var defaultColors = ['#f6ede7', '#e9fce4', '#dffdfb', '#e5e9fa', '#facadc'];
+/* =========================
+   背景渐变色设置
+========================= */
+
+var defaultColors = [
+    '#f6ede7',
+    '#e9fce4',
+    '#dffdfb',
+    '#e5e9fa',
+    '#facadc'
+];
+
 var colorPickers = [
     document.getElementById('gradColor1'),
     document.getElementById('gradColor2'),
@@ -216,31 +590,71 @@ var colorPickers = [
 ];
 
 function applyGradient(colors) {
-    document.body.style.backgroundImage = 'linear-gradient(135deg, ' + colors.join(', ') + ')';
-    localStorage.setItem('customBgColors', JSON.stringify(colors));
+
+    document.body.style.backgroundImage =
+        'linear-gradient(135deg, ' +
+        colors.join(', ') +
+        ')';
+
+    localStorage.setItem(
+        'customBgColors',
+        JSON.stringify(colors)
+    );
 }
 
-var savedColors = JSON.parse(localStorage.getItem('customBgColors'));
+var savedColors =
+    JSON.parse(localStorage.getItem('customBgColors'));
+
 if (savedColors && savedColors.length === 5) {
+
     applyGradient(savedColors);
-    savedColors.forEach(function(c, i) { colorPickers[i].value = c; });
+
+    savedColors.forEach(function(c, i) {
+
+        colorPickers[i].value = c;
+    });
 }
 
 colorPickers.forEach(function(picker) {
+
     picker.addEventListener('input', function() {
-        var currentColors = colorPickers.map(function(p) { return p.value; });
+
+        var currentColors =
+            colorPickers.map(function(p) {
+
+                return p.value;
+            });
+
         applyGradient(currentColors);
     });
 });
 
 function resetBackground() {
+
     applyGradient(defaultColors);
-    defaultColors.forEach(function(c, i) { colorPickers[i].value = c; });
+
+    defaultColors.forEach(function(c, i) {
+
+        colorPickers[i].value = c;
+    });
+
     localStorage.removeItem('customBgColors');
 }
 
-/*时钟颜色设置*/
-var defaultClockColors = ['#ff4747', '#ff942e', '#c8de43', '#449645', '#3ec5ba', '#4695ff', '#d150e8'];
+/* =========================
+   时钟颜色设置
+========================= */
+
+var defaultClockColors = [
+    '#ff4747',
+    '#ff942e',
+    '#c8de43',
+    '#449645',
+    '#3ec5ba',
+    '#4695ff',
+    '#d150e8'
+];
+
 var clockPickers = [
     document.getElementById('clockColor1'),
     document.getElementById('clockColor2'),
@@ -252,26 +666,55 @@ var clockPickers = [
 ];
 
 function applyClockGradient(colors) {
+
     var clk = document.getElementById('clock');
-    clk.style.backgroundImage = 'linear-gradient(135deg, ' + colors.join(', ') + ')';
-    localStorage.setItem('customClockColors', JSON.stringify(colors));
+
+    clk.style.backgroundImage =
+        'linear-gradient(135deg, ' +
+        colors.join(', ') +
+        ')';
+
+    localStorage.setItem(
+        'customClockColors',
+        JSON.stringify(colors)
+    );
 }
 
-var savedClockColors = JSON.parse(localStorage.getItem('customClockColors'));
+var savedClockColors =
+    JSON.parse(localStorage.getItem('customClockColors'));
+
 if (savedClockColors && savedClockColors.length === 7) {
+
     applyClockGradient(savedClockColors);
-    savedClockColors.forEach(function(c, i) { clockPickers[i].value = c; });
+
+    savedClockColors.forEach(function(c, i) {
+
+        clockPickers[i].value = c;
+    });
 }
 
 clockPickers.forEach(function(picker) {
+
     picker.addEventListener('input', function() {
-        var currentColors = clockPickers.map(function(p) { return p.value; });
+
+        var currentColors =
+            clockPickers.map(function(p) {
+
+                return p.value;
+            });
+
         applyClockGradient(currentColors);
     });
 });
 
 function resetClockColor() {
+
     applyClockGradient(defaultClockColors);
-    defaultClockColors.forEach(function(c, i) { clockPickers[i].value = c; });
+
+    defaultClockColors.forEach(function(c, i) {
+
+        clockPickers[i].value = c;
+    });
+
     localStorage.removeItem('customClockColors');
 }

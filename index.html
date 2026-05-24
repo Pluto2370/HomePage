@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>我的主页</title>
+    <title>Rainbow</title>
+    <link rel="icon" type="image/png" href="favicon.png">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&display=swap">
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/setting.css">
@@ -68,6 +69,16 @@
                     <button class="reset-bg-btn" id="resetClockBtn">默认</button>                </div>
             </div>
         </div>
+        <div class="settings-section">
+            <div class="settings-row">
+                <label class="settings-label">书签管理</label>
+                <div class="gradient-colors-wrapper">
+                    <button class="reset-bg-btn" id="exportBookmarksBtn">导出</button>
+                    <button class="reset-bg-btn" id="importBookmarksBtn">导入</button>
+                    <input type="file" id="importBookmarksFile" accept=".json" style="display:none">
+                </div>
+            </div>
+        </div>
     </div>
     <!--时间-->
     <section class="clock-section" aria-label="当前时间">
@@ -78,7 +89,7 @@
     <!--搜索框-->
     <div class="search-container">
         <div class="search-box">
-            <input type="text" class="search-input" placeholder="搜索 . . .">
+            <input type="text" class="search-input" placeholder="搜索 ....">
             <button class="search-btn" id="searchBtn">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                     <circle cx="11" cy="11" r="8"></circle>
