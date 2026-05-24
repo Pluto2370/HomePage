@@ -149,8 +149,7 @@ body {
     transition: transform 0.25s ease, box-shadow 0.25s ease;
 }
 .bookmark-icon span {
-    font-family: "Ma Shan Zheng", "STKaiti", "KaiTi", cursive !important;
-    font-size: 28px !important;
+    font-family: "Nunito", "YouYuan", "幼圆", "Microsoft YaHei", sans-serif;    font-size: 28px !important;
     font-weight: bolder !important;
     background-image: linear-gradient(
             135deg,
@@ -230,6 +229,15 @@ body {
 .form-input::placeholder {
     color: rgba(100, 100, 100, 0.5);
 }
+.icon-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+.icon-input {
+    flex: 1;
+}
+
 .form-buttons {
     display: flex;
     gap: 10px;
