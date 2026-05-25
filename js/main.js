@@ -14,6 +14,7 @@ function doSearch() {
     var query = document.querySelector('.search-input').value.trim();
     if (query) {
         window.open('https://www.baidu.com/s?wd=' + encodeURIComponent(query));
+        document.querySelector('.search-input').value = '';
     }
 }
 
@@ -68,11 +69,15 @@ document.getElementById('importBookmarksFile').addEventListener('change', functi
 document.getElementById('resetBgBtn').addEventListener('click', resetBackground);
 document.getElementById('resetClockBtn').addEventListener('click', resetClockColor);
 
+
 document.addEventListener('click', function() {
     searchInput.classList.remove('active');
     overlay.classList.remove('active');
     document.getElementById('editForm').classList.remove('show');
     document.getElementById('settingsPanel').classList.remove('show');
+    if (searchInput.value.trim()) {
+        searchInput.value = '';
+    }
 });
 
 /*书签*/
